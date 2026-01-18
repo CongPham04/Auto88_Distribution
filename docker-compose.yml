@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  # ------------------------------------
+  # 1. Database Service (MySQL)
+  # ------------------------------------
+  db:
+    image: mysql:8.0
+    container_name: auto88_mysql
+    environment:
+      MYSQL_DATABASE: car_sales_db 
+      MYSQL_ROOT_PASSWORD: Auto88SecurePwd
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    hostname: db
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+      interval: 5s
+    restart: always
+
+  # ------------------------------------
+  # 2. Backend Service
+  # ------------------------------------
+  backend:
+    # ❌ ĐÃ XÓA PHẦN BUILD
+    # ✅ Thay bằng Image trên Docker Hub của bạn
+    image: dieuduong_it/auto88-backend:v1  
+    container_name: auto88_be
+    ports:
+      - "8080:8080"
+    environment:
+      MAIL_USERNAME: auto88.com.vn@gmail.com
+      MAIL_PASSWORD: ufdmjnkbkgcjpmjq 
+      # 👇 Cần nhắc người nhận thay đổi nếu họ chạy trên domain/IP khác
+      FRONTEND_URL: http://localhost:80 
+      APP_BASE_URL: http://localhost:80/carshop
+      
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/car_sales_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Auto88SecurePwd
+      
+      JWT_SECRET: HCUzp+KbjzGwPpBYKLChUvu9WUc+D9b3kAvq1cDi45jkVKzf+EF9bpIeq42e0KFSm7Lqm2i93YLmi4qQ9lW5g== 
+      CORS_ALLOWED_ORIGINS: "*" # Cho phép tất cả để người khác dễ test
+      SERVER_SERVLET_CONTEXT_PATH: /carshop
+
+    volumes:
+      # 👇 Đã sửa: Dùng volume ảo thay vì trỏ vào thư mục code cũ
+      - uploads_data:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+
+  # ------------------------------------
+  # 3. Frontend Service
+  # ------------------------------------
+  frontend:
+    # ❌ ĐÃ XÓA PHẦN BUILD
+    # ✅ Thay bằng Image trên Docker Hub của bạn
+    image: dieuduong_it/auto88-frontend:v1
+    container_name: auto88_fe
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: always
+
+# Định nghĩa các ổ đĩa ảo để lưu dữ liệu lâu dài
+volumes:
+  db_data:      # Lưu dữ liệu MySQL
+  uploads_data: # Lưu ảnh upload (đã sửa cho gọn)
