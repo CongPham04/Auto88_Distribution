@@ -26,9 +26,7 @@ services:
   # 2. Backend Service
   # ------------------------------------
   backend:
-    # ❌ ĐÃ XÓA PHẦN BUILD
-    # ✅ Thay bằng Image trên Docker Hub của bạn
-    image: dieuduong_it/auto88-backend:v1  
+    image: congpham04/auto88-backend:v1  
     container_name: auto88_be
     ports:
       - "8080:8080"
@@ -59,9 +57,7 @@ services:
   # 3. Frontend Service
   # ------------------------------------
   frontend:
-    # ❌ ĐÃ XÓA PHẦN BUILD
-    # ✅ Thay bằng Image trên Docker Hub của bạn
-    image: dieuduong_it/auto88-frontend:v1
+    image: congpham04/auto88-frontend:v1
     container_name: auto88_fe
     ports:
       - "80:80"
